@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="joguete"
-run/main_scene="uid://by0heoi8l7bd3"
+run/main_scene="uid://dxaoi0oour1ey"
 config/features=PackedStringArray("4.4", "Forward Plus")
 config/icon="res://icon.svg"
 
