@@ -360,8 +360,54 @@ animation = &"idle"
 autoplay = "idle"
 frame_progress = 0.393402
 
-[node name="RayCast2D" type="RayCast2D" parent="."]
-
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0.5, 2.5)
 shape = SubResource("RectangleShape2D_cbvro")
+
+[node name="CoyoteTimer" type="Timer" parent="."]
+wait_time = 0.1
+one_shot = true
+
+[node name="BufferPuloTimer" type="Timer" parent="."]
+wait_time = 0.12
+one_shot = true
+
+[node name="CantoSuperioEsquerdoF" type="RayCast2D" parent="."]
+position = Vector2(-6, -6)
+target_position = Vector2(0, -2)
+hit_from_inside = true
+
+[node name="CantoSuperioEsquerdoD" type="RayCast2D" parent="."]
+position = Vector2(-4, -6)
+target_position = Vector2(0, -2)
+hit_from_inside = true
+
+[node name="CantoSuperioDireitoD" type="RayCast2D" parent="."]
+position = Vector2(5, -6)
+target_position = Vector2(0, -2)
+hit_from_inside = true
+
+[node name="CantoSuperioDireitoF" type="RayCast2D" parent="."]
+position = Vector2(7, -6)
+target_position = Vector2(0, -2)
+hit_from_inside = true
+
+[node name="RightLedgeHop" type="RayCast2D" parent="."]
+position = Vector2(8, 6)
+target_position = Vector2(2, 0)
+hit_from_inside = true
+
+[node name="RightLedgeHop2" type="RayCast2D" parent="."]
+position = Vector2(8, 10)
+target_position = Vector2(2, 0)
+hit_from_inside = true
+
+[node name="LeftLedgeHop2" type="RayCast2D" parent="."]
+position = Vector2(-7, 6)
+target_position = Vector2(-2, 0)
+hit_from_inside = true
+
+[node name="LeftLedgeHop3" type="RayCast2D" parent="."]
+position = Vector2(-7, 10)
+target_position = Vector2(-2, 0)
+hit_from_inside = true

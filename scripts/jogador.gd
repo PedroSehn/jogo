@@ -1,47 +1,79 @@
 extends CharacterBody2D
 
-@export var speed: float = 200.0
-@export var jump_velocity: float = -400.0
-@export var gravity: float = 900.0
+@onready var CoyoteTimer: Timer = $CoyoteTimer
+@onready var BufferPuloTimer: Timer = $BufferPuloTimer
+@onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
-var is_jumping: bool = false
-var on_hit: bool = false
+var coyteTimeActivated: bool = false
 
-func _physics_process(delta):
-	var velocity = self.velocity
+const jumpHeight: float = -230.0
+var gravity: float = 12.0
+const maxGravity: float = 14.5
 
-	# Aplicar gravidade
-	if not is_on_floor():
-		velocity.y += gravity * delta
-	else:
-		is_jumping = false
-
-	# Movimento horizontal
-	var direction = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
-	velocity.x = direction * speed
+const maxSpeed: float = 80.0
+const acceleration: float = 8.0
+const friction: float = 10
 
 
-	# Pulo
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		velocity.y = jump_velocity
-		is_jumping = true
-
-
-	# Virar sprite
-	if direction != 0:
-		$AnimatedSprite2D.flip_h = direction < 0
+func _physics_process(delta: float) -> void:
+	var x_input: float = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+	var velocityWeight: float = delta * (acceleration if x_input else friction)
+	velocity.x = lerp(velocity.x, x_input * maxSpeed, velocityWeight)
 	
- 	
-	if direction != 0:
-		$AnimatedSprite2D.play("andar")
-	else:
+	if is_on_floor():
+		coyteTimeActivated = false
+		gravity = lerp(gravity, 12.0 ,12.0 * delta)
+	else: 
+		if CoyoteTimer.is_stopped() and !coyteTimeActivated:
+			CoyoteTimer.start()
+			coyteTimeActivated = true
+		
+		if Input.is_action_just_released("jump") or is_on_ceiling():
+			velocity.y *= 0.5
+		
+		gravity = lerp(gravity, maxGravity, 12.0 * delta)
+	
+	if Input.is_action_just_pressed("jump"):
+		
+		if BufferPuloTimer.is_stopped():
+			BufferPuloTimer.start()
+	
+	if !BufferPuloTimer.is_stopped() and (!CoyoteTimer.is_stopped() or is_on_floor()):
 		$AnimatedSprite2D.play("idle")
-
-	if is_jumping and !is_on_floor():
-		if velocity.y < 0:
-			$AnimatedSprite2D.play("pular")
-		else:
-			$AnimatedSprite2D.play("cair")
-
-	self.velocity = velocity
+		velocity.y = jumpHeight
+		BufferPuloTimer.stop()
+		CoyoteTimer.stop()
+		coyteTimeActivated = true
+	
+	if velocity.y < jumpHeight/2.0:
+		var colisaoCabeca: Array = [$CantoSuperioEsquerdoD.is_colliding(), $CantoSuperioEsquerdoF.is_colliding(), $CantoSuperioDireitoF.is_colliding(), $CantoSuperioDireitoD.is_colliding()]
+		if colisaoCabeca.count(true) == 1:
+			if colisaoCabeca[0]:
+				global_position.x += 1.75
+			if colisaoCabeca[2]:
+				global_position.x -= 1.75
+	
+	if velocity.y > -30 and velocity.y < -5 and abs(velocity.x) > 3:
+		if $LeftLedgeHop2.is_colliding() and !$LeftLedgeHop3.is_colliding() and velocity.x < 0:
+			velocity.y += jumpHeight/3.25
+		if $RightLedgeHop.is_colliding() and !$RightLedgeHop2.is_colliding() and velocity.x > 0:
+			velocity.y += jumpHeight/3.25
+	
+	velocity.y += gravity
+	
 	move_and_slide()
+	
+	# ANIMAÇÕES
+	if !is_on_floor():
+		if velocity.y < 0:
+			sprite.play("pular")
+		else:
+			sprite.play("cair")
+	elif abs(velocity.x) > 1:
+		sprite.play("andar")
+	else:
+		sprite.play("idle")
+
+	# INVERTE SPRITE
+	if velocity.x != 0:
+		sprite.flip_h = velocity.x < 0
