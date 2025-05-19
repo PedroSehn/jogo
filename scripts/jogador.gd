@@ -5,9 +5,9 @@ extends CharacterBody2D
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
 
 @onready var jump_sound: AudioStreamPlayer2D = $JumpSound
-@onready var step_sound: AudioStreamPlayer2D = $StepSound
 @onready var death_sound: AudioStreamPlayer2D = $DeathSound
 
+var vivo: bool = true
 var coyteTimeActivated: bool = false
 
 const jumpHeight: float = -230.0
@@ -18,8 +18,13 @@ const maxSpeed: float = 100.0
 const acceleration: float = 10.0
 const friction: float = 10
 
+func _ready():
+	add_to_group("jogador")
 
 func _physics_process(delta: float) -> void:
+	if !vivo:
+		return
+	
 	var x_input: float = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	var velocityWeight: float = delta * (acceleration if x_input else friction)
 	velocity.x = lerp(velocity.x, x_input * maxSpeed, velocityWeight)
@@ -68,20 +73,68 @@ func _physics_process(delta: float) -> void:
 	
 	move_and_slide()
 	
+	for i in get_slide_collision_count():
+		var col = get_slide_collision(i)
+		if col.get_collider().is_in_group("enemy"):
+			if global_position.y < col.get_collider().global_position.y - 10:
+			# Está acima do inimigo (vai matar ele via _on_head_hit)
+				pass
+			else:
+				#morrer()
+				print('morre')
+
+	
 	# ANIMAÇÕES
-	if !is_on_floor():
+	if !is_on_floor() and vivo:
 		if velocity.y < 0:
 			sprite.play("pular")
 		else:
 			sprite.play("cair")
-	elif abs(velocity.x) > 1:
+	elif abs(velocity.x) > 1 and vivo:
 		sprite.play("andar")
-		if !step_sound.playing:
-			step_sound.play()
 	else:
 		sprite.play("idle")
-		step_sound.stop()
+		
+		
 
 	# INVERTE SPRITE
 	if velocity.x != 0:
 		sprite.flip_h = velocity.x < 0
+
+
+func matar():
+	if !vivo:
+		return
+	$DeathSound.play()
+	sprite.play("dano")
+	vivo = false
+	await animacao_morte()
+	set_physics_process(false)
+	$CollisionShape2D.disabled = true
+	await get_tree().create_timer(0.7).timeout
+	get_tree().reload_current_scene()
+
+
+func _on_hitbox_body_entered(body: Node2D) -> void:
+	if body.is_in_group('inimigo'):
+		matar()
+
+
+func animacao_morte():
+	var start_position = position
+	var up_position = start_position - Vector2(0, 25)
+	var down_position = start_position + Vector2(0, 4)
+	
+	while position.y > up_position.y:
+		position.y -= 2
+		position.x -= 1
+		await get_tree().create_timer(0.01).timeout
+	
+	#while position.x > 15:
+		#position.x -= 2
+		#await get_tree().create_timer(0.01).timeout
+	
+	while position.y < down_position.y:
+		position.y += 4
+		position.x -= 1
+		await get_tree().create_timer(0.01).timeout

@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://dxaoi0oour1ey"]
+[gd_scene load_steps=7 format=3 uid="uid://dxaoi0oour1ey"]
 
 [ext_resource type="Texture2D" uid="uid://dlbbkn4cjl8wp" path="res://assets/Terrain/Terrain (16x16).png" id="1_8dnef"]
 [ext_resource type="PackedScene" uid="uid://dqdtsmihek87t" path="res://scenes/jogador.tscn" id="1_u5pyp"]
 [ext_resource type="PackedScene" uid="uid://cdymuxr3rq1j" path="res://scenes/fruta.tscn" id="3_u7fro"]
+[ext_resource type="PackedScene" uid="uid://c7tq2ufwutk51" path="res://scenes/inimigo.tscn" id="4_u7fro"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ugoy3"]
 texture = ExtResource("1_8dnef")
@@ -194,7 +195,7 @@ sources/0 = SubResource("TileSetAtlasSource_ugoy3")
 [node name="Fase1" type="Node2D"]
 
 [node name="Jogador" parent="." instance=ExtResource("1_u5pyp")]
-position = Vector2(-1496, -51)
+position = Vector2(297, 4)
 
 [node name="Camera2D" type="Camera2D" parent="Jogador"]
 zoom = Vector2(3.5, 3.5)
@@ -208,3 +209,6 @@ metadata/_edit_group_ = true
 
 [node name="Fruta" parent="." instance=ExtResource("3_u7fro")]
 position = Vector2(143, 1)
+
+[node name="Inimigo" parent="." instance=ExtResource("4_u7fro")]
+position = Vector2(457, 17)
